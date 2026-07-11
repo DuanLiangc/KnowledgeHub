@@ -6,7 +6,7 @@
 
 ## 环境要求
 
-- JDK 17 或更高版本
+- JDK 21
 - Maven 3.8 或更高版本
 
 ## 启动项目
@@ -49,7 +49,7 @@ curl http://localhost:8080/api/knowledge-spaces
 | `knowledge-infrastructure` | 对接数据库、模型和文件系统 | 内存 Repository 适配器 |
 | `knowledge-api` | 应用入口和 HTTP 接口 | REST API、参数校验、异常处理、健康检查 |
 
-更详细的依赖关系和代码放置规则见 [项目结构说明](docs/PROJECT_STRUCTURE.md)。
+后续开发以 [项目主线](docs/PROJECT_ROADMAP.md) 为范围基准；更详细的依赖关系和代码放置规则见 [项目结构说明](docs/PROJECT_STRUCTURE.md)。
 
 ## 推荐阅读顺序
 
