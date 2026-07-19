@@ -2,7 +2,7 @@
 
 ## 架构选择
 
-当前项目是一个 Maven 多模块的“模块化单体”。部署时只有一个 Spring Boot 应用，代码中则用模块明确职责。它比微服务容易运行和调试，又能避免所有代码堆在一起。
+后端是 Maven 多模块的“模块化单体”，前端是独立的 Vue 3 工程。后端部署时只有一个 Spring Boot 应用，代码中用模块明确职责；前端开发时通过 Vite 代理调用后端。
 
 依赖方向如下：
 
@@ -25,6 +25,7 @@ KnowledgeHub/
 ├── knowledge-application/        # 用例编排、输入命令、输出端口
 ├── knowledge-infrastructure/     # 数据库、对象存储、模型等外部适配器
 ├── knowledge-api/                # Spring Boot 启动、HTTP API、配置装配
+├── knowledge-web/                # Vue 3 知识空间管理与聊天界面
 └── docs/                         # 学习和架构文档
 ```
 
@@ -38,10 +39,22 @@ HTTP POST
   -> KnowledgeSpaceService（编排创建用例）
   -> KnowledgeSpace（执行领域规则）
   -> KnowledgeSpaceRepository（应用层定义的接口）
-  -> InMemoryKnowledgeSpaceRepository（基础设施实现）
+  -> PostgresKnowledgeSpaceRepository（基础设施实现）
 ```
 
-将来接入 PostgreSQL 时，只需新增一个 Repository 实现并修改装配配置，Controller、Service 和领域对象都不需要知道数据库已经发生变化。这就是端口与适配器思想的直接价值。
+项目已用 PostgreSQL Adapter 替换最初的内存实现，Controller、Service 和领域对象都不需要知道存储方式已经变化。这就是端口与适配器思想的直接价值。
+
+模型问答也遵循相同的分层方式：
+
+```text
+POST /api/chat 或 /api/chat/stream
+  -> ChatController（接收问题，选择 JSON 或 SSE 返回方式）
+  -> ChatService（添加系统指令，编排问答用例）
+  -> ChatModelPort（应用层定义的模型调用端口）
+  -> OpenAiResponsesClient（基础设施层的 Responses API 适配器）
+```
+
+`ChatService` 不依赖 OpenAI。阶段 3 改用 Spring AI，或以后增加其他模型供应商时，只需替换或新增基础设施适配器。流式接口使用 Java 21 虚拟线程读取上游 SSE，避免长时间占用昂贵的平台线程。
 
 ## 新功能放在哪里
 
@@ -56,10 +69,9 @@ HTTP POST
 
 ## 演进路线
 
-1. 用 PostgreSQL 替换内存存储，学习持久化和数据库迁移。
-2. 增加文档上传与对象存储，建立异步处理状态。
-3. 实现文档解析、Chunk 切分和 Embedding。
-4. 接入 pgvector，完成第一次语义检索。
-5. 接入大模型，完成带引用的流式 RAG 问答。
-6. 增加混合检索、Rerank、权限过滤和评估集。
-
+1. 完善知识空间 CRUD 与 PostgreSQL 集成测试。
+2. 接入大模型，学习普通响应与 SSE 流式响应。
+3. 增加文档上传与对象存储，建立异步处理状态。
+4. 实现文档解析、Chunk 切分、Embedding 和 pgvector 检索。
+5. 完成带引用的流式 RAG 问答。
+6. 增加评估集、混合检索、Rerank 和权限过滤。

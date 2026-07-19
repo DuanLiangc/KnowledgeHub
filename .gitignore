@@ -4,4 +4,7 @@ target/
 **/target/
 .DS_Store
 .env
-
+application-local.yml
+.m2/
+knowledge-web/node_modules/
+knowledge-web/dist/

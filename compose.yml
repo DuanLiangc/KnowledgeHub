@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg17-trixie
+    container_name: knowledge-hub-postgres
+    environment:
+      POSTGRES_DB: knowledge_hub
+      POSTGRES_USER: knowledge_hub
+      POSTGRES_PASSWORD: knowledge_hub_local
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U knowledge_hub -d knowledge_hub"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
